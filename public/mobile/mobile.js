@@ -1,5 +1,5 @@
 var args = {
-    frequency:20,                   // ( How often the object sends the values - milliseconds )
+    frequency:33,                   // ( How often the object sends the values - milliseconds )
     gravityNormalized:true,         // ( If the gravity related values to be normalized )
     orientationBase:GyroNorm.GAME,      // ( Can be GyroNorm.GAME or GyroNorm.WORLD. gn.GAME returns orientation values with respect to the head direction of the device. gn.WORLD returns the orientation values with respect to the actual north direction of the world. )
     decimalCount:3,                 // ( How many digits after the decimal point will there be in the return values )
@@ -28,9 +28,6 @@ gn.init(args).then(function(){
     // data.dm.alpha    ( devicemotion event rotationRate alpha value )
     // data.dm.beta     ( devicemotion event rotationRate beta value )
     // data.dm.gamma    ( devicemotion event rotationRate gamma value )
-    // 
-
-
 
 
         var details = {
@@ -41,9 +38,9 @@ gn.init(args).then(function(){
 
             },
             'acceleration':{
-                'x': Math.cos(data.do.gamma)*data.dm.x,
-                'y': Math.cos(data.do.alpha)*data.dm.y,
-                'z': Math.cos(data.do.beta)*data.dm.z
+                'x': Math.cos(data.do.gamma*(180/Math.PI))*data.dm.x,
+                'y': Math.cos(data.do.alpha*(180/Math.PI))*data.dm.y,
+                'z': Math.cos(data.do.beta*(180/Math.PI))*data.dm.z
             },
 
             'id': document.getElementById("device_id").value
@@ -52,29 +49,10 @@ gn.init(args).then(function(){
         var url = "motion";
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-type", "application/json");
-        xhr.onreadystatechange = function () {
-            // if (xhr.readyState === 4 && xhr.status === 200) {
-            //     var json = JSON.parse(xhr.responseText);
-            //     console.log(json.email + ", " + json.password);
-            // }
-        };
         var tosend = JSON.stringify(details, ['orientation', 'acceleration', 'alpha', 'beta', 'gamma', 'x','y','z', 'id']);
         console.log(tosend)
         xhr.send(tosend);
 
-
-
-
-        // const formBody = Object.keys(details) .map(key=>encodeURIComponent(key)+'='+encodeURIComponent(details[key])).join('&')
-
-        // fetch('motion', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Accept': 'application/json',
-        //     'Content-Type': 'application/x-www-form-urlencoded'
-        //   },
-        //   body: formBody
-        // })
     });
 }).catch(function(e){
   // Catch if the DeviceOrientation or DeviceMotion is not supported by the browser or device
