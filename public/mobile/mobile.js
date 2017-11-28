@@ -29,7 +29,7 @@ gn.init(args).then(function(){
     // data.dm.beta     ( devicemotion event rotationRate beta value )
     // data.dm.gamma    ( devicemotion event rotationRate gamma value )
 
-
+    	var accels = cell_to_earth(data.do.alpha, data.do.beta, data.do.gamma, data.dm.x, data.dm.y, data.dm.z);
         var details = {
             'orientation':{
                 'alpha': data.do.alpha,
@@ -38,9 +38,9 @@ gn.init(args).then(function(){
 
             },
             'acceleration':{
-                'x': Math.cos(data.do.gamma*(180/Math.PI))*data.dm.x,
-                'y': Math.cos(data.do.alpha*(180/Math.PI))*data.dm.y,
-                'z': Math.cos(data.do.beta*(180/Math.PI))*data.dm.z
+                'x': accels.x,
+                'y': accels.y,
+                'z': accels.z
             },
 
             'id': document.getElementById("device_id").value
@@ -61,3 +61,37 @@ gn.init(args).then(function(){
 window.onclick=function(){
     gn.setHeadDirection();
 }
+
+
+let _x, _y, _z;
+let cX, cY, cZ, sX, sY, sZ;
+/*
+ * return the rotation matrix corresponding to the orientation angles
+ */
+const cell_to_earth = function(alpha, beta, gamma,cellx,celly,cellz) {
+	_z = alpha;
+	_x = beta;
+	_y = gamma;
+
+	cX = Math.cos( _x );
+	cY = Math.cos( _y );
+	cZ = Math.cos( _z );
+	sX = Math.sin( _x );
+	sY = Math.sin( _y );
+	sZ = Math.sin( _z );
+
+	var mat_accel = math.matrix([[cellx], [celly], [cellz]]);
+	var mat_earth_to_cell = math.matrix([
+			[cZ * cY + sZ * sX * sY, - cY * sZ + cZ * sX * sY, cX * sY],
+			[cX * sZ, cZ * cX, - sX],
+			[- cZ * sY + sZ * sX * cY, sZ * sY + cZ * cY * sX, cX * cY]
+		]
+	)
+
+	var accel_in_earth = math.multiply(math.inv(mat_earth_to_cell), mat_accel);
+	return {
+		x: math.subset(accel_in_earth, math.index(0, 0)), 
+		y: math.subset(accel_in_earth, math.index(1, 0)), 
+		z: math.subset(accel_in_earth, math.index(2, 0))     
+	}  
+};
