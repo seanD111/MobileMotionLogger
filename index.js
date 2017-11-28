@@ -10,11 +10,19 @@ app.use('/', express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+var devices = {};
+
 app.post('/motion', (request, response)=>{
-    // var gyro = JSON.parse(request.body);
-    console.log(request.body);
+    devices[request.body.id] =request.body.acceleration;
     // console.log(gyro.alpha + " " + gyro.beta+ ' ' +gyro.gamma )
     response.sendStatus(200);
+})
+
+app.get('/motion', (request, response)=>{
+    // var gyro = JSON.parse(request.body);
+    console.log(devices);
+    // console.log(gyro.alpha + " " + gyro.beta+ ' ' +gyro.gamma )
+    response.send(devices);
 })
 
 app.listen(PORT_NUMBER, function () {
